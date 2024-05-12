@@ -1,0 +1,127 @@
+.keyword-exit {
+    -fx-text-fill: red;
+}
+
+.keyword-let {
+    -fx-text-fill: blue;
+}
+
+.keyword-if {
+    -fx-text-fill: purple;
+}
+
+.keyword-elif {
+    -fx-text-fill: purple;
+}
+
+.keyword-else {
+    -fx-text-fill: purple;
+}
+
+.keyword-while {
+    -fx-text-fill: purple;
+}
+
+.keyword-true {
+    -fx-text-fill: green;
+}
+
+.keyword-false {
+    -fx-text-fill: green;
+}
+
+.keyword-print {
+    -fx-text-fill: blue;
+}
+
+.symbol-comment {
+    -fx-text-fill: gray;
+}
+
+.symbol-open-paren {
+    -fx-text-fill: orange;
+}
+
+.symbol-close-paren {
+    -fx-text-fill: orange;
+}
+
+.symbol-equals {
+    -fx-text-fill: orange;
+}
+
+.symbol-plus {
+    -fx-text-fill: orange;
+}
+
+.symbol-minus {
+    -fx-text-fill: orange;
+}
+
+.symbol-asterisk {
+    -fx-text-fill: orange;
+}
+
+.symbol-slash {
+    -fx-text-fill: orange;
+}
+
+.symbol-percent {
+    -fx-text-fill: orange;
+}
+
+.symbol-semicolon {
+    -fx-text-fill: orange;
+}
+
+.symbol-open-brace {
+    -fx-text-fill: orange;
+}
+
+.symbol-close-brace {
+    -fx-text-fill: orange;
+}
+
+.symbol-exclamation {
+    -fx-text-fill: orange;
+}
+
+.symbol-greater {
+    -fx-text-fill: orange;
+}
+
+.symbol-greater-equals {
+    -fx-text-fill: orange;
+}
+
+.symbol-less {
+    -fx-text-fill: orange;
+}
+
+.symbol-less-equals {
+    -fx-text-fill: orange;
+}
+
+.symbol-ampersand {
+    -fx-text-fill: orange;
+}
+
+.symbol-vertical-bar {
+    -fx-text-fill: orange;
+}
+
+.symbol-quote {
+    -fx-text-fill: green;
+}
+
+.integer {
+    -fx-fill: lightblue;
+}
+
+.root .non-keyword {
+    -fx-fill: white; /* White color for non-keyword text in dark mode */
+}
+
+.root .default {
+    -fx-fill: black; /* Black color for default text in light mode */
+}
