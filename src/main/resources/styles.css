@@ -1,117 +1,117 @@
 .keyword-exit {
-    -fx-text-fill: red;
+    -fx-fill: red;
 }
 
 .keyword-let {
-    -fx-text-fill: blue;
+    -fx-fill: blue;
 }
 
 .keyword-if {
-    -fx-text-fill: purple;
+    -fx-fill: purple;
 }
 
 .keyword-elif {
-    -fx-text-fill: purple;
+    -fx-fill: purple;
 }
 
 .keyword-else {
-    -fx-text-fill: purple;
+    -fx-fill: purple;
 }
 
 .keyword-while {
-    -fx-text-fill: purple;
+    -fx-fill: purple;
 }
 
 .keyword-true {
-    -fx-text-fill: green;
+    -fx-fill: green;
 }
 
 .keyword-false {
-    -fx-text-fill: green;
+    -fx-fill: green;
 }
 
 .keyword-print {
-    -fx-text-fill: blue;
+    -fx-fill: blue;
 }
 
 .symbol-comment {
-    -fx-text-fill: gray;
+    -fx-fill: gray;
 }
 
 .symbol-open-paren {
-    -fx-text-fill: orange;
+    -fx-fill: orange;
 }
 
 .symbol-close-paren {
-    -fx-text-fill: orange;
+    -fx-fill: orange;
 }
 
 .symbol-equals {
-    -fx-text-fill: orange;
+    -fx-fill: orange;
 }
 
 .symbol-plus {
-    -fx-text-fill: orange;
+    -fx-fill: orange;
 }
 
 .symbol-minus {
-    -fx-text-fill: orange;
+    -fx-fill: orange;
 }
 
 .symbol-asterisk {
-    -fx-text-fill: orange;
+    -fx-fill: orange;
 }
 
 .symbol-slash {
-    -fx-text-fill: orange;
+    -fx-fill: orange;
 }
 
 .symbol-percent {
-    -fx-text-fill: orange;
+    -fx-fill: orange;
 }
 
 .symbol-semicolon {
-    -fx-text-fill: orange;
+    -fx-fill: orange;
 }
 
 .symbol-open-brace {
-    -fx-text-fill: orange;
+    -fx-fill: orange;
 }
 
 .symbol-close-brace {
-    -fx-text-fill: orange;
+    -fx-fill: orange;
 }
 
 .symbol-exclamation {
-    -fx-text-fill: orange;
+    -fx-fill: orange;
 }
 
 .symbol-greater {
-    -fx-text-fill: orange;
+    -fx-fill: orange;
 }
 
 .symbol-greater-equals {
-    -fx-text-fill: orange;
+    -fx-fill: orange;
 }
 
 .symbol-less {
-    -fx-text-fill: orange;
+    -fx-fill: orange;
 }
 
 .symbol-less-equals {
-    -fx-text-fill: orange;
+    -fx-fill: orange;
 }
 
 .symbol-ampersand {
-    -fx-text-fill: orange;
+    -fx-fill: orange;
 }
 
 .symbol-vertical-bar {
-    -fx-text-fill: orange;
+    -fx-fill: orange;
 }
 
 .symbol-quote {
-    -fx-text-fill: green;
+    -fx-fill: green;
 }
 
 .integer {

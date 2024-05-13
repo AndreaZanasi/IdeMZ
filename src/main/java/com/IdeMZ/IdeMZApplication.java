@@ -126,7 +126,9 @@ public class IdeMZApplication extends Application {
         // Change the image, button color, and non-highlighted text color when the "Light Mode" button is clicked
         lightModeButton.setOnAction(event -> {
             for (int i = 0; i < textArea.getLength(); i++) {
-                textArea.setStyleClass(i, i+1, "default"); // Reset the style class for each character
+                if (!syntaxHighlighter.isKeywordOrSymbol(textArea.getText(i, i+1))) {
+                    textArea.setStyleClass(i, i+1, "default"); // Reset the style class for non-keyword and non-symbol characters
+                }
             }
             textArea.setStyle("-fx-background-color: #FFFFFF; -fx-text-fill: #000000;"); // Set the text color to black in light mode
             textArea.getStyleClass().remove("dark"); // Remove the dark style class from the textArea

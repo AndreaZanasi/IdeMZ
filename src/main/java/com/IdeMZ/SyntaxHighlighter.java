@@ -14,8 +14,6 @@ public class SyntaxHighlighter {
     public SyntaxHighlighter() {
         keywords = new HashMap<>();
         symbols = new HashMap<>();
-
-        // Initialize keywords with CSS class names
         keywords.put("exit", "keyword-exit");
         keywords.put("let", "keyword-let");
         keywords.put("if", "keyword-if");
@@ -25,8 +23,6 @@ public class SyntaxHighlighter {
         keywords.put("true", "keyword-true");
         keywords.put("false", "keyword-false");
         keywords.put("print", "keyword-print");
-
-        // Initialize symbols with CSS class names
         symbols.put("@", "symbol-comment");
         symbols.put("(", "symbol-open-paren");
         symbols.put(")", "symbol-close-paren");
@@ -49,6 +45,10 @@ public class SyntaxHighlighter {
         symbols.put("\"", "symbol-quote");
     }
 
+    public boolean isKeywordOrSymbol(String text) {
+        return keywords.containsKey(text) || symbols.containsKey(text);
+    }
+
     public void highlight(StyleClassedTextArea textArea) {
         // Clear previous styles
         textArea.clearStyle(0, textArea.getLength());
@@ -56,30 +56,53 @@ public class SyntaxHighlighter {
         // Apply the "non-keyword" style class to all text initially
         textArea.setStyleClass(0, textArea.getLength(), "non-keyword");
 
-        // Apply keyword and symbol styles
+        // Apply keyword, symbol, comment, and string styles
         String text = textArea.getText();
+        boolean inComment = false;
+        boolean inMultiLineComment = false;
+        boolean inString = false;
         for (int i = 0; i < text.length(); i++) {
-            for (String keyword : keywords.keySet()) {
-                if (text.startsWith(keyword, i)) {
-                    textArea.setStyleClass(i, i + keyword.length(), keywords.get(keyword));
-                    i += keyword.length() - 1; // -1 because the for loop will increment i
-                    break;
-                }
+            if (i < text.length() - 1 && text.charAt(i) == '@' && text.charAt(i + 1) == '@') {
+                textArea.setStyleClass(i, i+1, "symbol-comment"); // Apply style to the first '@'
+                inMultiLineComment = !inMultiLineComment;
+                i++; // Skip the next '@'
+            } else if (text.charAt(i) == '@' && !inMultiLineComment) {
+                inComment = true;
+            } else if (text.charAt(i) == '\n' && inComment && !inString) {
+                inComment = false;
+            } else if (text.charAt(i) == '\"' && !inString) {
+                inString = true;
+            } else if ((text.charAt(i) == '\"' || text.charAt(i) == '\n') && inString) {
+                inString = false;
             }
-            for (String symbol : symbols.keySet()) {
-                if (text.startsWith(symbol, i)) {
-                    textArea.setStyleClass(i, i + symbol.length(), symbols.get(symbol));
-                    i += symbol.length() - 1; // -1 because the for loop will increment i
-                    break;
-                }
-            }
-        }
 
-        // Highlight integers
-        Pattern pattern = Pattern.compile("\\b\\d+\\b");
-        Matcher matcher = pattern.matcher(text);
-        while (matcher.find()) {
-            textArea.setStyleClass(matcher.start(), matcher.end(), "integer");
+            if (inComment || inMultiLineComment) {
+                textArea.setStyleClass(i, i+1, "symbol-comment");
+            } else if (inString) {
+                textArea.setStyleClass(i, i+1, "symbol-quote");
+            } else {
+                for (String keyword : keywords.keySet()) {
+                    if (text.startsWith(keyword, i)) {
+                        textArea.setStyleClass(i, i + keyword.length(), keywords.get(keyword));
+                        i += keyword.length() - 1; // -1 because the for loop will increment i
+                        break;
+                    }
+                }
+                for (String symbol : symbols.keySet()) {
+                    if (text.startsWith(symbol, i)) {
+                        textArea.setStyleClass(i, i + symbol.length(), symbols.get(symbol));
+                        i += symbol.length() - 1; // -1 because the for loop will increment i
+                        break;
+                    }
+                }
+                // Highlight integers only if not in comment or string
+                Pattern pattern = Pattern.compile("\\b\\d+\\b");
+                Matcher matcher = pattern.matcher(text.substring(i));
+                if (matcher.find() && matcher.start() == 0) {
+                    textArea.setStyleClass(i, i + matcher.end(), "integer");
+                    i += matcher.end() - 1; // -1 because the for loop will increment i
+                }
+            }
         }
     }
 }
