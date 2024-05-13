@@ -1,0 +1,35 @@
+{
+  "keywords": {
+    "exit": "keyword-exit",
+    "let": "keyword-let",
+    "if": "keyword-if",
+    "elif": "keyword-elif",
+    "else": "keyword-else",
+    "while": "keyword-while",
+    "true": "keyword-true",
+    "false": "keyword-false",
+    "print": "keyword-print"
+  },
+  "symbols": {
+    "@": "symbol-comment",
+    "(": "symbol-open-paren",
+    ")": "symbol-close-paren",
+    "=": "symbol-equals",
+    "+": "symbol-plus",
+    "-": "symbol-minus",
+    "*": "symbol-asterisk",
+    "/": "symbol-slash",
+    "%": "symbol-percent",
+    ";": "symbol-semicolon",
+    "{": "symbol-open-brace",
+    "}": "symbol-close-brace",
+    "!": "symbol-exclamation",
+    ">": "symbol-greater",
+    ">=": "symbol-greater-equals",
+    "<": "symbol-less",
+    "<=": "symbol-less-equals",
+    "&": "symbol-ampersand",
+    "|": "symbol-vertical-bar",
+    "\"": "symbol-quote"
+  }
+}
