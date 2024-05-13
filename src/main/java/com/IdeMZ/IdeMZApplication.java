@@ -1,6 +1,7 @@
 package com.IdeMZ;
 
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
@@ -94,12 +95,19 @@ public class IdeMZApplication extends Application {
         styleDialog.initModality(Modality.NONE);
         styleDialog.setTitle("Style");
 
-        Button darkModeButton = new Button("Dark Mode");
-        darkModeButton.setOnAction(event -> setDarkModeStyle());
-        Button lightModeButton = new Button("Light Mode");
-        lightModeButton.setOnAction(event -> setLightModeStyle());
+        VBox dialogVBox = new VBox();
+        dialogVBox.setAlignment(Pos.CENTER);
 
-        VBox dialogVBox = new VBox(darkModeButton, lightModeButton);
+        HBox buttonBox = gethBox(dialogVBox);
+
+        dialogVBox.getChildren().add(buttonBox);
+
+        if (isDarkMode) {
+            dialogVBox.setStyle("-fx-background-color: #31363F;");
+        } else {
+            dialogVBox.setStyle("-fx-background-color: #9394A5;");
+        }
+
         styleDialog.getDialogPane().setContent(dialogVBox);
         styleDialog.getDialogPane().setMinWidth(500);
         styleDialog.getDialogPane().setMinHeight(300);
@@ -107,6 +115,27 @@ public class IdeMZApplication extends Application {
         styleDialog.getDialogPane().getScene().getWindow().setOnCloseRequest(event -> styleDialog.close());
 
         return styleDialog;
+    }
+
+    private HBox gethBox(VBox dialogVBox) {
+        Button darkModeButton = new Button("Dark Mode");
+        darkModeButton.setOnAction(event -> {
+            setDarkModeStyle();
+            dialogVBox.setStyle("-fx-background-color: #31363F;");
+        });
+        darkModeButton.setPrefSize(100, 100);
+
+        Button lightModeButton = new Button("Light Mode");
+        lightModeButton.setOnAction(event -> {
+            setLightModeStyle();
+            dialogVBox.setStyle("-fx-background-color: #9394A5;");
+        });
+        lightModeButton.setPrefSize(100, 100);
+
+        HBox buttonBox = new HBox(darkModeButton, lightModeButton);
+        buttonBox.setSpacing(10);
+        buttonBox.setAlignment(Pos.CENTER);
+        return buttonBox;
     }
 
     private void setDarkModeStyle() {
