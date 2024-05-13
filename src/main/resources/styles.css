@@ -2,6 +2,14 @@
     -fx-fill: red;
 }
 
+.keyword-print {
+    -fx-fill: red;
+}
+
+.keyword-read {
+    -fx-fill: red;
+}
+
 .keyword-let {
     -fx-fill: purple;
 }
@@ -28,10 +36,6 @@
 
 .keyword-false {
     -fx-fill: orange;
-}
-
-.keyword-print {
-    -fx-fill: yellow;
 }
 
 .symbol-comment {

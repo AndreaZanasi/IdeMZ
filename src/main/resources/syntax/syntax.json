@@ -8,7 +8,8 @@
     "while": "keyword-while",
     "true": "keyword-true",
     "false": "keyword-false",
-    "print": "keyword-print"
+    "print": "keyword-print",
+    "read": "keyword-read"
   },
   "symbols": {
     "@": "symbol-comment",
