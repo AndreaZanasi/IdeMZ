@@ -27,8 +27,8 @@ public class IdeMZApplication extends Application {
     private static final Logger LOGGER = Logger.getLogger(IdeMZApplication.class.getName());
     private final StyleClassedTextArea textArea = new StyleClassedTextArea();
     private boolean isDarkMode = false;
-    private HBox hbox; // Add this line
-    private Button openFileButton; // Add this line
+    private HBox hbox;
+    private Button openFileButton;
     private MenuButton settingsButton;
 
     @Override
@@ -38,8 +38,8 @@ public class IdeMZApplication extends Application {
 
         textArea.textProperty().addListener((obs, oldText, newText) -> syntaxHighlighter.highlight(textArea));
 
-        openFileButton = createButton(); // Modify this line
-        settingsButton = createMenuButton(); // Modify this line
+        openFileButton = createButton();
+        settingsButton = createMenuButton();
 
         openFileButton.setOnAction(event -> {
             File file = fileOpener.openFile();
@@ -63,11 +63,16 @@ public class IdeMZApplication extends Application {
         hbox = new HBox(openFileButton, settingsButton);
         hbox.setFillHeight(true);
 
-        setDarkModeStyle(); // Move this line here
+        setDarkModeStyle();
 
         VBox vbox = new VBox(hbox, textArea);
         vbox.setFillWidth(true);
         VBox.setVgrow(textArea, Priority.ALWAYS);
+
+        openFileButton.setPrefSize(20, 20);
+        settingsButton.setPrefSize(20, 20);
+
+        textArea.getStyleClass().add("text-area-big-font");
 
         Scene scene = new Scene(vbox, 800, 600);
         scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());
@@ -77,35 +82,11 @@ public class IdeMZApplication extends Application {
     }
 
     private Button createButton() {
-        Button button = new Button();
-        ImageView blackIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/images/file_black.png")).toExternalForm()));
-        ImageView whiteIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/images/file_white.png")).toExternalForm()));
-        blackIcon.setFitWidth(15);
-        blackIcon.setFitHeight(15);
-        blackIcon.setPreserveRatio(true);
-        whiteIcon.setFitWidth(15);
-        whiteIcon.setFitHeight(15);
-        whiteIcon.setPreserveRatio(true);
-        button.setGraphic(blackIcon);
-        button.setText("");
-        button.setPrefSize(20, 20); // Set preferred size to 20x20
-        return button;
+        return new Button();
     }
 
     private MenuButton createMenuButton() {
-        MenuButton button = new MenuButton();
-        ImageView blackIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/images/gear_black.png")).toExternalForm()));
-        ImageView whiteIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/images/gear_white.png")).toExternalForm()));
-        blackIcon.setFitWidth(15);
-        blackIcon.setFitHeight(15);
-        blackIcon.setPreserveRatio(true);
-        whiteIcon.setFitWidth(15);
-        whiteIcon.setFitHeight(15);
-        whiteIcon.setPreserveRatio(true);
-        button.setGraphic(blackIcon);
-        button.setText("");
-        button.setPrefSize(20, 20); // Set preferred size to 20x20
-        return button;
+        return new MenuButton();
     }
 
     private Dialog<Void> createStyleDialog() {
@@ -123,6 +104,8 @@ public class IdeMZApplication extends Application {
         styleDialog.getDialogPane().setMinWidth(500);
         styleDialog.getDialogPane().setMinHeight(300);
 
+        styleDialog.getDialogPane().getScene().getWindow().setOnCloseRequest(event -> styleDialog.close());
+
         return styleDialog;
     }
 
@@ -137,8 +120,23 @@ public class IdeMZApplication extends Application {
         hbox.setStyle(darkModeColor);
         openFileButton.setStyle(darkModeColor);
         settingsButton.setStyle(darkModeColor);
-        openFileButton.setGraphic(new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/images/file_white.png")).toExternalForm())));
-        settingsButton.setGraphic(new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/images/gear_white.png")).toExternalForm())));
+
+        double imageWidth = 30.0;
+        double imageHeight = 30.0;
+
+        Image file_white = new Image(Objects.requireNonNull(getClass().getResource("/images/file_white.png")).toExternalForm());
+        ImageView file_white_view = new ImageView(file_white);
+        file_white_view.setFitWidth(imageWidth);
+        file_white_view.setFitHeight(imageHeight);
+
+        Image gear_white = new Image(Objects.requireNonNull(getClass().getResource("/images/gear_white.png")).toExternalForm());
+        ImageView gear_white_view = new ImageView(gear_white);
+        gear_white_view.setFitWidth(imageWidth);
+        gear_white_view.setFitHeight(imageHeight);
+
+        openFileButton.setGraphic(file_white_view);
+        settingsButton.setGraphic(gear_white_view);
+
         textArea.getStyleClass().add("dark");
         isDarkMode = true;
     }
@@ -154,13 +152,29 @@ public class IdeMZApplication extends Application {
         hbox.setStyle(lightModeColor);
         openFileButton.setStyle(lightModeColor);
         settingsButton.setStyle(lightModeColor);
-        openFileButton.setGraphic(new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/images/file_black.png")).toExternalForm())));
-        settingsButton.setGraphic(new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/images/gear_black.png")).toExternalForm())));
+
+        double imageWidth = 30.0;
+        double imageHeight = 30.0;
+
+        Image file_black = new Image(Objects.requireNonNull(getClass().getResource("/images/file_black.png")).toExternalForm());
+        ImageView file_black_view = new ImageView(file_black);
+        file_black_view.setFitWidth(imageWidth);
+        file_black_view.setFitHeight(imageHeight);
+
+        Image gear_black = new Image(Objects.requireNonNull(getClass().getResource("/images/gear_black.png")).toExternalForm());
+        ImageView gear_black_view = new ImageView(gear_black);
+        gear_black_view.setFitWidth(imageWidth);
+        gear_black_view.setFitHeight(imageHeight);
+
+        openFileButton.setGraphic(file_black_view);
+        settingsButton.setGraphic(gear_black_view);
+
         textArea.getStyleClass().remove("dark");
-        textArea.setStyle("-fx-fill: black;"); // Directly apply the style to the text
+        textArea.setStyle("-fx-fill: black;");
 
         isDarkMode = false;
     }
+
     public static void main(String[] args) {
         launch(args);
     }

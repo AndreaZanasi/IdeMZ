@@ -3,7 +3,7 @@
 }
 
 .keyword-let {
-    -fx-fill: blue;
+    -fx-fill: purple;
 }
 
 .keyword-if {
@@ -23,15 +23,15 @@
 }
 
 .keyword-true {
-    -fx-fill: green;
+    -fx-fill: orange;
 }
 
 .keyword-false {
-    -fx-fill: green;
+    -fx-fill: orange;
 }
 
 .keyword-print {
-    -fx-fill: blue;
+    -fx-fill: yellow;
 }
 
 .symbol-comment {
@@ -128,5 +128,9 @@
 
 .root.dark .default {
     -fx-fill: white; /* White color for default text in dark mode */
+}
+
+.text-area-big-font {
+    -fx-font-size: 20;
 }
 
