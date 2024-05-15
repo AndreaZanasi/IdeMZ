@@ -3,26 +3,31 @@ package com.IdeMZ;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import org.fxmisc.richtext.StyleClassedTextArea;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 public class PersonOverviewController {
+
+    private static final Logger logger = LogManager.getLogger(PersonOverviewController.class);
 
     @FXML
     private StyleClassedTextArea styleClassedTextArea;
 
-    @FXML
-    private MenuItem fileButton;
-
     private SyntaxHighlighter syntaxHighlighter;
     private String selectedFilePath;
+
+    //file button
 
     @FXML
     private void handleOpenFile() {
@@ -38,10 +43,39 @@ public class PersonOverviewController {
 
                 selectedFilePath = selectedFile.getAbsolutePath();
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error(e);
             }
         }
     }
+
+    @FXML
+    private void handleSaveButton() {
+        if (selectedFilePath == null) {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save File");
+            File file = fileChooser.showSaveDialog(styleClassedTextArea.getScene().getWindow());
+            if (file != null) {
+                selectedFilePath = file.getAbsolutePath();
+            } else {
+                return;
+            }
+        }
+
+        try {
+            String content = styleClassedTextArea.getText();
+
+            Files.writeString(Path.of(selectedFilePath), content);
+        } catch (IOException e) {
+            logger.error(e);
+        }
+    }
+
+    @FXML
+    private void handleExitButton() {
+        Platform.exit();
+    }
+
+    //run button
 
     @FXML
     private void handleRunButton() {
@@ -50,11 +84,10 @@ public class PersonOverviewController {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Information");
             alert.setHeaderText(null);
-            alert.setContentText("Please select a file to run.");
+            alert.setContentText("Please save the file before running.");
 
             alert.showAndWait();
         } else {
-            // A file is selected, run the process
             try {
                 ProcessBuilder processBuilder = new ProcessBuilder(
                         "java",
@@ -65,43 +98,31 @@ public class PersonOverviewController {
                 );
 
                 Process process = processBuilder.start();
+
+                // Read the output of the process and print it to the console
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                }
+
                 int exitCode = process.waitFor();
                 System.out.println("Process exited with code " + exitCode);
             } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @FXML
-    private void handleSaveButton() {
-        if (selectedFilePath != null) {
-            try {
-                String content = styleClassedTextArea.getText();
-
-                Files.writeString(Path.of(selectedFilePath), content);
-            } catch (IOException e) {
-                e.printStackTrace();
+                logger.error(e);
             }
         }
     }
 
     @FXML
     public void initialize() {
-        // Create a SyntaxHighlighter instance
         syntaxHighlighter = new SyntaxHighlighter();
 
-        // Add a listener to the text property of the StyleClassedTextArea
-        styleClassedTextArea.textProperty().addListener((obs, oldText, newText) -> {
-            // Call updateSyntaxHighlighting method when text changes
-            updateSyntaxHighlighting();
-        });
+        styleClassedTextArea.textProperty().addListener((obs, oldText, newText) -> updateSyntaxHighlighting());
     }
 
     // Method to update syntax highlighting
     private void updateSyntaxHighlighting() {
-        Platform.runLater(() -> {
-            syntaxHighlighter.highlight(styleClassedTextArea);
-        });
+        Platform.runLater(() -> syntaxHighlighter.highlight(styleClassedTextArea));
     }
 }

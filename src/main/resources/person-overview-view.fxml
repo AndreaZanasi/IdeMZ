@@ -4,32 +4,32 @@
 <?import javafx.scene.layout.*?>
 <?import org.fxmisc.richtext.*?>
 
-<AnchorPane prefHeight="228.0" prefWidth="795.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.IdeMZ.PersonOverviewController">
-    <children>
-        <ToolBar layoutX="249.0" layoutY="7.0" prefHeight="41.0" prefWidth="795.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<AnchorPane prefHeight="228.0" prefWidth="795.0" xmlns="http://javafx.com/javafx/17.0.2-ea"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.IdeMZ.PersonOverviewController">
+    <ToolBar layoutX="249.0" layoutY="7.0" prefHeight="41.0" prefWidth="795.0" AnchorPane.leftAnchor="0.0"
+             AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <MenuButton mnemonicParsing="false" text="File">
             <items>
-            <MenuButton mnemonicParsing="false" text="File">
-              <items>
-                  <MenuItem fx:id="fileButton" mnemonicParsing="false" onAction="#handleOpenFile" text="Open File" />
-                  <MenuItem fx:id="saveButton" mnemonicParsing="false" onAction="#handleSaveButton" text="Save" />
-                  <MenuItem mnemonicParsing="false" text="Exit" />
-              </items>
-            </MenuButton>
-                <MenuButton mnemonicParsing="false" text="Settings">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Style" />
-                    </items>
-                </MenuButton>
-                <MenuButton mnemonicParsing="false" text="Translate">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Default" />
-                        <MenuItem mnemonicParsing="false" text="Emilian" />
-                        <MenuItem mnemonicParsing="false" text="Minimal" />
-                        <MenuItem mnemonicParsing="false" text="Zanna" />
-                    </items>
-                </MenuButton>
-                <Button mnemonicParsing="false" onAction="#handleRunButton" text="Run" />
+                <MenuItem mnemonicParsing="false" onAction="#handleOpenFile" text="Open File"/>
+                <MenuItem mnemonicParsing="false" onAction="#handleSaveButton" text="Save"/>
+                <MenuItem mnemonicParsing="false" text="Exit" onAction="#handleExitButton"/>
             </items>
-        </ToolBar>
-        <StyleClassedTextArea fx:id="styleClassedTextArea" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="41.0" />    </children>
-    </AnchorPane>
+        </MenuButton>
+        <MenuButton mnemonicParsing="false" text="Settings">
+            <items>
+                <MenuItem mnemonicParsing="false" text="Style"/>
+            </items>
+        </MenuButton>
+        <MenuButton mnemonicParsing="false" text="Translate">
+            <items>
+                <MenuItem mnemonicParsing="false" text="Default"/>
+                <MenuItem mnemonicParsing="false" text="Emilian"/>
+                <MenuItem mnemonicParsing="false" text="Minimal"/>
+                <MenuItem mnemonicParsing="false" text="Zanna"/>
+            </items>
+        </MenuButton>
+        <Button mnemonicParsing="false" onAction="#handleRunButton" text="Run"/>
+    </ToolBar>
+    <StyleClassedTextArea fx:id="styleClassedTextArea" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="41.0"/>
+</AnchorPane>
