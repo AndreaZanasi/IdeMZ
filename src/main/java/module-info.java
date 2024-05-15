@@ -1,9 +1,10 @@
 module IdeMZ {
     requires javafx.controls;
-    requires javafx.graphics;
-    requires org.fxmisc.richtext;
-    requires java.logging;
+    requires javafx.fxml;
+    requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
+    requires org.fxmisc.richtext;
 
-    exports com.IdeMZ;
+    opens com.IdeMZ to javafx.fxml;
+    exports com.IdeMZ to javafx.graphics;
 }

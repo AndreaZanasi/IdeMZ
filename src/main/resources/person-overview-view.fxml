@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="228.0" prefWidth="795.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.IdeMZ.PersonOverviewController">
+    <children>
+        <ToolBar layoutX="249.0" layoutY="7.0" prefHeight="41.0" prefWidth="795.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <items>
+                <Button fx:id="fileButton" mnemonicParsing="false" onAction="#handleOpenFile" text="File" textAlignment="CENTER" />
+                <Button mnemonicParsing="false" text="Run" />
+                <MenuButton mnemonicParsing="false" text="Settings">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="Style" />
+                    </items>
+                </MenuButton>
+                <MenuButton mnemonicParsing="false" text="Translate">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="Default" />
+                        <MenuItem mnemonicParsing="false" text="Emilian" />
+                        <MenuItem mnemonicParsing="false" text="Minimal" />
+                        <MenuItem mnemonicParsing="false" text="Zanna" />
+                    </items>
+                </MenuButton>
+            </items>
+        </ToolBar>
+        <TextArea fx:id="textArea" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0" />
+    </children>
+</AnchorPane>

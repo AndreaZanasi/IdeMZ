@@ -1,8 +1,8 @@
 package com.IdeMZ;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.fxmisc.richtext.StyleClassedTextArea;
-import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.IOException;
 import java.io.InputStream;
