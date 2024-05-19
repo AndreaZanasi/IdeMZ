@@ -92,7 +92,7 @@ public class PersonOverviewController {
                 ProcessBuilder processBuilder = new ProcessBuilder(
                         "java",
                         "-jar",
-                        "C:\\Users\\Utente\\IdeaProjects\\IdeMZ\\CompilerMZ-0.6.0-Alpha-jar-with-dependencies.jar",
+                        "CompilerMZ-0.6.0-Alpha-jar-with-dependencies.jar",
                         "-i",
                         selectedFilePath
                 );
