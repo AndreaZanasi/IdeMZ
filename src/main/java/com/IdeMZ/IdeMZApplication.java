@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,6 +32,10 @@ public class IdeMZApplication extends Application {
     private HBox hbox;
     private Button openFileButton;
     private MenuButton settingsButton;
+    private File currentFile;
+    private Button saveFileButton;
+    private Button runButton;
+
 
     @Override
     public void start(Stage primaryStage) {
@@ -45,6 +50,7 @@ public class IdeMZApplication extends Application {
         openFileButton.setOnAction(event -> {
             File file = fileOpener.openFile();
             if (file != null) {
+                currentFile = file; // Save the opened file to the currentFile variable
                 Path filePath = file.toPath();
                 try {
                     String content = Files.readString(filePath);
@@ -56,12 +62,55 @@ public class IdeMZApplication extends Application {
             }
         });
 
+        saveFileButton = new Button();
+        saveFileButton.setPrefSize(20, 20);
+        saveFileButton.setOnAction(event -> {
+            if (currentFile != null) {
+                try {
+                    Files.writeString(currentFile.toPath(), textArea.getText(), StandardOpenOption.TRUNCATE_EXISTING);
+                    // TODO Only format the file in default dialect
+                    String command = String.format("java -jar src/main/resources/CompilerMZ-1.0.0-Stable-jar-with-dependencies.jar -i %s --format", currentFile.getAbsolutePath());
+                    ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", command);
+                    Process process = processBuilder.start();
+                    int exitCode = process.waitFor();
+                    if (exitCode != 0) {
+                        LOGGER.log(Level.SEVERE, "The process exited with error code: " + exitCode);
+                        return;
+                    }
+                    // Reload the text area with the updated file
+                    String content = Files.readString(currentFile.toPath());
+                    textArea.replaceText(content);
+                    syntaxHighlighter.highlight(textArea);
+                } catch (IOException e) {
+                    LOGGER.log(Level.SEVERE, "An IO exception occurred", e);
+                } catch (InterruptedException e) {
+                    LOGGER.log(Level.SEVERE, "An InterruptedException occurred", e);
+                }
+            }
+        });
+
+        runButton = new Button();
+        runButton.setPrefSize(20, 20);
+        runButton.setOnAction(event -> {
+            if (currentFile != null) {
+                try {
+                    String filePath = currentFile.getAbsolutePath();
+                    String filePathWithoutExtension = filePath.substring(0, filePath.lastIndexOf('.'));
+                    String command = String.format("java -jar src/main/resources/CompilerMZ-1.0.0-Stable-jar-with-dependencies.jar -i %s && %s; exec bash", filePath, filePathWithoutExtension);
+                    Runtime.getRuntime().exec(new String[]{"gnome-terminal", "--", "bash", "-c", command});
+                } catch (IOException e) {
+                    LOGGER.log(Level.SEVERE, "An IO exception occurred", e);
+                }
+            }
+        });
+
+
         Dialog<Void> styleDialog = createStyleDialog();
         MenuItem styleButton = new MenuItem("Style");
         settingsButton.getItems().add(styleButton);
         styleButton.setOnAction(event -> styleDialog.show());
 
-        hbox = new HBox(openFileButton, settingsButton);
+        hbox = new HBox(openFileButton, settingsButton, saveFileButton, runButton);
         hbox.setFillHeight(true);
 
         setDarkModeStyle();
@@ -149,6 +198,8 @@ public class IdeMZApplication extends Application {
         hbox.setStyle(darkModeColor);
         openFileButton.setStyle(darkModeColor);
         settingsButton.setStyle(darkModeColor);
+        saveFileButton.setStyle(darkModeColor);
+        runButton.setStyle(darkModeColor);
 
         double imageWidth = 30.0;
         double imageHeight = 30.0;
@@ -163,8 +214,23 @@ public class IdeMZApplication extends Application {
         gear_white_view.setFitWidth(imageWidth);
         gear_white_view.setFitHeight(imageHeight);
 
+        // Inside the setDarkModeStyle method, after setting the graphic for the openFileButton
+        Image save_white = new Image(Objects.requireNonNull(getClass().getResource("/images/save_white.png")).toExternalForm());
+        ImageView save_white_view = new ImageView(save_white);
+        save_white_view.setFitWidth(30.0);
+        save_white_view.setFitHeight(30.0);
+
+        // Inside the setDarkModeStyle method, after setting the graphic for the saveFileButton
+        Image play_white = new Image(Objects.requireNonNull(getClass().getResource("/images/play_white.png")).toExternalForm());
+        ImageView play_white_view = new ImageView(play_white);
+        play_white_view.setFitWidth(30.0);
+        play_white_view.setFitHeight(30.0);
+
+
         openFileButton.setGraphic(file_white_view);
         settingsButton.setGraphic(gear_white_view);
+        saveFileButton.setGraphic(save_white_view);
+        runButton.setGraphic(play_white_view);
 
         textArea.getStyleClass().add("dark");
         isDarkMode = true;
@@ -181,6 +247,8 @@ public class IdeMZApplication extends Application {
         hbox.setStyle(lightModeColor);
         openFileButton.setStyle(lightModeColor);
         settingsButton.setStyle(lightModeColor);
+        saveFileButton.setStyle(lightModeColor);
+        runButton.setStyle(lightModeColor);
 
         double imageWidth = 30.0;
         double imageHeight = 30.0;
@@ -195,8 +263,23 @@ public class IdeMZApplication extends Application {
         gear_black_view.setFitWidth(imageWidth);
         gear_black_view.setFitHeight(imageHeight);
 
+        // Inside the setLightModeStyle method, after setting the graphic for the openFileButton
+        Image save_black = new Image(Objects.requireNonNull(getClass().getResource("/images/save_black.png")).toExternalForm());
+        ImageView save_black_view = new ImageView(save_black);
+        save_black_view.setFitWidth(30.0);
+        save_black_view.setFitHeight(30.0);
+
+        // Inside the setLightModeStyle method, after setting the graphic for the saveFileButton
+        Image play_black = new Image(Objects.requireNonNull(getClass().getResource("/images/play_black.png")).toExternalForm());
+        ImageView play_black_view = new ImageView(play_black);
+        play_black_view.setFitWidth(30.0);
+        play_black_view.setFitHeight(30.0);
+
+
         openFileButton.setGraphic(file_black_view);
         settingsButton.setGraphic(gear_black_view);
+        saveFileButton.setGraphic(save_black_view);
+        runButton.setGraphic(play_black_view);
 
         textArea.getStyleClass().remove("dark");
         textArea.setStyle("-fx-fill: black;");
