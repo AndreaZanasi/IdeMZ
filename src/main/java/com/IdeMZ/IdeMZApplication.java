@@ -113,7 +113,7 @@ public class IdeMZApplication extends Application {
                 }
             }
             try {
-                Files.writeString(currentFile.toPath(), textArea.getText(), StandardOpenOption.CREATE);
+                Files.writeString(currentFile.toPath(), textArea.getText(), StandardOpenOption.TRUNCATE_EXISTING);
                 String command = String.format("java -jar src/main/resources/CompilerMZ-1.0.0-Stable-jar-with-dependencies.jar -i %s --format", currentFile.getAbsolutePath());
                 executeCommand(command);
                 // Reload the text area with the updated file

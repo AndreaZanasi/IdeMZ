@@ -130,16 +130,10 @@
     -fx-fill: black; /* Black color for non-keyword text in light mode */
 }
 
-
-.root .default {
-    -fx-fill: black; /* Black color for default text in light mode */
-}
-
-.root.dark .default {
+.root.dark {
     -fx-fill: white; /* White color for default text in dark mode */
 }
 
 .text-area-big-font {
     -fx-font-size: 20;
 }
-
