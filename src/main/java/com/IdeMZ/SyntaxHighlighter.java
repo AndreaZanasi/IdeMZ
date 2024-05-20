@@ -11,18 +11,31 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SyntaxHighlighter {
-    private final Map<String, String> keywords;
-    private final Map<String, String> symbols;
+    private Map<String, String> dialect;
+    private final Map<String, String> syntax;
     private final Pattern integerPattern = Pattern.compile("\\b\\d+\\b");
 
-    public SyntaxHighlighter() {
+    public SyntaxHighlighter(String dialectName) {
         ObjectMapper mapper = new ObjectMapper();
+        try (InputStream is = getClass().getResourceAsStream("/dialects/" + dialectName + ".json")) {
+            dialect = mapper.readValue(is, new TypeReference<>() {});
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load " + dialectName + ".json", e);
+        }
+
         try (InputStream is = getClass().getResourceAsStream("/syntax/syntax.json")) {
-            Map<String, Map<String, String>> syntax = mapper.readValue(is, new TypeReference<>() {});
-            keywords = syntax.get("keywords");
-            symbols = syntax.get("symbols");
+            syntax = mapper.readValue(is, new TypeReference<>() {});
         } catch (IOException e) {
             throw new RuntimeException("Failed to load syntax.json", e);
+        }
+    }
+
+    public void updateDialect(String dialectName) {
+        ObjectMapper mapper = new ObjectMapper();
+        try (InputStream is = getClass().getResourceAsStream("/dialects/" + dialectName + ".json")) {
+            dialect = mapper.readValue(is, new TypeReference<>() {});
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load " + dialectName + ".json", e);
         }
     }
 
@@ -58,7 +71,7 @@ public class SyntaxHighlighter {
             } else if (inString) {
                 textArea.setStyleClass(i, i+1, "symbol-quote");
             } else {
-                i = applyKeywordOrSymbolStyle(textArea, text.toString(), i);
+                i = applyStyle(textArea, text.toString(), i);
                 Matcher matcher = integerPattern.matcher(text.substring(i));
                 if (matcher.find() && matcher.start() == 0) {
                     textArea.setStyleClass(i, i + matcher.end(), "integer");
@@ -68,17 +81,14 @@ public class SyntaxHighlighter {
         }
     }
 
-    private int applyKeywordOrSymbolStyle(StyleClassedTextArea textArea, String text, int i) {
-        for (String keyword : keywords.keySet()) {
-            if (text.startsWith(keyword, i)) {
-                textArea.setStyleClass(i, i + keyword.length(), keywords.get(keyword));
-                return i + keyword.length() - 1;
-            }
-        }
-        for (String symbol : symbols.keySet()) {
-            if (text.startsWith(symbol, i)) {
-                textArea.setStyleClass(i, i + symbol.length(), symbols.get(symbol));
-                return i + symbol.length() - 1;
+    private int applyStyle(StyleClassedTextArea textArea, String text, int i) {
+        for (String word : dialect.keySet()) {
+            if (text.startsWith(word, i)) {
+                String style = syntax.get(dialect.get(word));
+                if (style != null) {
+                    textArea.setStyleClass(i, i + word.length(), style);
+                }
+                return i + word.length() - 1;
             }
         }
         return i;
