@@ -1,14 +1,18 @@
 package com.IdeMZ;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -33,18 +37,27 @@ public class IdeMZApplication extends Application {
     private MenuButton translateButton;
     private File currentFile;
     private Button saveFileButton;
+    private Button openDirectoryButton;
     private Button runButton;
     private String currentDialect = "default_dialect";
     SyntaxHighlighter syntaxHighlighter = new SyntaxHighlighter("default_dialect");
+    private TreeView<File> directoryTreeView;
+    BorderPane borderPane = new BorderPane();
+    SplitPane splitPane = new SplitPane();
 
 
     @Override
     public void start(Stage primaryStage) {
 
+        primaryStage.setTitle("IdeMZ");
+
         Image applicationIcon = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/logo.png")));
         primaryStage.getIcons().add(applicationIcon);
 
         textArea.textProperty().addListener((obs, oldText, newText) -> syntaxHighlighter.highlight(textArea));
+
+        directoryTreeView = new TreeView<>();
+        VBox.setVgrow(directoryTreeView, Priority.ALWAYS);
 
         //buttons
         openFileButton = createButton();
@@ -62,20 +75,25 @@ public class IdeMZApplication extends Application {
         settingsButton = createMenuButton();
         configureSettingsButton();
 
+        openDirectoryButton = createButton();
+        configureOpenDirectoryButton(primaryStage);
+
         //hbox for buttons
-        hbox = new HBox(openFileButton, settingsButton, saveFileButton, runButton, translateButton);
+        hbox = new HBox(openFileButton, openDirectoryButton, saveFileButton, runButton, translateButton, settingsButton);
         hbox.setSpacing(20);
         hbox.setFillHeight(true);
 
-        setDarkModeStyle();
+        splitPane.getItems().addAll(directoryTreeView, textArea);
+        splitPane.setDividerPositions(0.2);
 
-        VBox vbox = new VBox(hbox, textArea);
-        vbox.setFillWidth(true);
-        VBox.setVgrow(textArea, Priority.ALWAYS);
+        borderPane.setTop(hbox);
+        borderPane.setCenter(splitPane);
+
+        setDarkModeStyle();
 
         textArea.getStyleClass().add("text-area-big-font");
 
-        Scene scene = new Scene(vbox, 800, 600);
+        Scene scene = new Scene(borderPane, 800, 600);
         scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());
 
         primaryStage.setScene(scene);
@@ -114,8 +132,10 @@ public class IdeMZApplication extends Application {
             }
             try {
                 Files.writeString(currentFile.toPath(), textArea.getText(), StandardOpenOption.CREATE);
-                String command = String.format("java -jar src/main/resources/CompilerMZ-1.0.0-Stable-jar-with-dependencies.jar -i %s --format", currentFile.getAbsolutePath());
-                executeCommand(command);
+                if (currentDialect.equals("default_dialect")) {
+                    String command = String.format("java -jar src/main/resources/CompilerMZ-1.0.0-Stable-jar-with-dependencies.jar -i %s --format", currentFile.getAbsolutePath());
+                    executeCommand(command);
+                }
                 // Reload the text area with the updated file
                 String content = Files.readString(currentFile.toPath());
                 textArea.replaceText(content);
@@ -203,6 +223,98 @@ public class IdeMZApplication extends Application {
         styleButton.setOnAction(event -> styleDialog.show());
     }
 
+    private void configureOpenDirectoryButton(Stage primaryStage) {
+        directoryTreeView.setCellFactory(tv -> new TreeCell<>() {
+            @Override
+            protected void updateItem(File item, boolean empty) {
+                super.updateItem(item, empty);
+                setText((empty || item == null) ? "" : item.getName());
+            }
+        });
+
+        directoryTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null && newValue.getValue().isFile()) {
+                currentFile = newValue.getValue();
+                try {
+                    String content = Files.readString(currentFile.toPath());
+                    textArea.replaceText(content);
+                    syntaxHighlighter.highlight(textArea);
+                } catch (IOException e) {
+                    LOGGER.log(Level.SEVERE, "An IO exception occurred", e);
+                }
+            }
+        });
+
+        openDirectoryButton.setPrefSize(20, 20);
+        openDirectoryButton.setOnAction(event -> {
+            DirectoryChooser directoryChooser = new DirectoryChooser();
+            File selectedDirectory = directoryChooser.showDialog(primaryStage);
+            if (selectedDirectory != null) {
+                TreeItem<File> rootItem = createNode(selectedDirectory);
+                directoryTreeView.setRoot(rootItem);
+            }
+        });
+    }
+
+    private TreeItem<File> createNode(final File file) {
+        return new TreeItem<>(file) {
+            private boolean isFirstTimeChildren = true;
+            private boolean isFirstTimeLeaf = true;
+            private boolean isLeaf;
+
+            @Override
+            public String toString() {
+                return this.getValue().getName();
+            }
+
+            @Override
+            public ObservableList<TreeItem<File>> getChildren() {
+                if (isFirstTimeChildren) {
+                    isFirstTimeChildren = false;
+                    super.getChildren().setAll(buildChildren(this));
+                }
+                return super.getChildren();
+            }
+
+            @Override
+            public boolean isLeaf() {
+                if (isFirstTimeLeaf) {
+                    isFirstTimeLeaf = false;
+                    isLeaf = this.getValue().isFile();
+                }
+                return isLeaf;
+            }
+
+            private ObservableList<TreeItem<File>> buildChildren(TreeItem<File> treeItem) {
+                File file = treeItem.getValue();
+                if (file != null && file.isDirectory()) {
+                    File[] files = file.listFiles();
+                    if (files != null) {
+                        ObservableList<TreeItem<File>> children = FXCollections.observableArrayList();
+                        for (File childFile : files) {
+                            TreeItem<File> childItem = createNode(childFile);
+                            children.add(childItem);
+                            childItem.addEventHandler(TreeItem.branchExpandedEvent(), event -> {
+                                if (childItem.isLeaf() && childItem.getValue().isFile()) {
+                                    currentFile = childItem.getValue();
+                                    try {
+                                        String content = Files.readString(currentFile.toPath());
+                                        textArea.replaceText(content);
+                                        syntaxHighlighter.highlight(textArea);
+                                    } catch (IOException e) {
+                                        LOGGER.log(Level.SEVERE, "An IO exception occurred", e);
+                                    }
+                                }
+                            });
+                        }
+                        return children;
+                    }
+                }
+                return FXCollections.emptyObservableList();
+            }
+        };
+    }
+
     private Button createButton() {
         return new Button();
     }
@@ -266,12 +378,14 @@ public class IdeMZApplication extends Application {
         String darkModeColor = "-fx-background-color: #31363F;";
         textArea.setStyle("-fx-background-color: #222831; -fx-text-fill: #EEEEEE;");
         hbox.setStyle(darkModeColor);
+        directoryTreeView.setStyle(darkModeColor);
 
         setButtonStyleAndGraphic(openFileButton, darkModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/file_white.png")).toExternalForm()));
         setButtonStyleAndGraphic(settingsButton, darkModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/gear_white.png")).toExternalForm()));
         setButtonStyleAndGraphic(saveFileButton, darkModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/save_white.png")).toExternalForm()));
         setButtonStyleAndGraphic(runButton, darkModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/play_white.png")).toExternalForm()));
         setButtonStyleAndGraphic(translateButton, darkModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/world_white.png")).toExternalForm()));
+        setButtonStyleAndGraphic(openDirectoryButton, darkModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/folder_white.png")).toExternalForm()));
 
         textArea.getStyleClass().add("dark");
         isDarkMode = true;
@@ -284,12 +398,14 @@ public class IdeMZApplication extends Application {
         String lightModeColor = "-fx-background-color: #9394A5;";
         textArea.setStyle("-fx-background-color: #fafafa; -fx-text-fill: #000000;");
         hbox.setStyle(lightModeColor);
+        directoryTreeView.setStyle(lightModeColor);
 
         setButtonStyleAndGraphic(openFileButton, lightModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/file_black.png")).toExternalForm()));
         setButtonStyleAndGraphic(settingsButton, lightModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/gear_black.png")).toExternalForm()));
         setButtonStyleAndGraphic(saveFileButton, lightModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/save_black.png")).toExternalForm()));
         setButtonStyleAndGraphic(runButton, lightModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/play_black.png")).toExternalForm()));
         setButtonStyleAndGraphic(translateButton, lightModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/world_black.png")).toExternalForm()));
+        setButtonStyleAndGraphic(openDirectoryButton, lightModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/folder_black.png")).toExternalForm()));
 
         textArea.getStyleClass().remove("dark");
         textArea.setStyle("-fx-fill: black;");

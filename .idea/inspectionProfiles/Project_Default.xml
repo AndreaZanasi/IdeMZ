@@ -3,7 +3,6 @@
     <option name="myName" value="Project Default" />
     <inspection_tool class="ExtractMethodRecommender" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="minLength" value="711" />
-      <option name="maxParameters" value="1" />
     </inspection_tool>
   </profile>
 </component>
