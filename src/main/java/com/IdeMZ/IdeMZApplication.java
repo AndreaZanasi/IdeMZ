@@ -1,11 +1,13 @@
 package com.IdeMZ;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -20,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -74,8 +77,29 @@ public class IdeMZApplication extends Application {
         VBox.setVgrow(textArea, Priority.ALWAYS);
 
         textArea.getStyleClass().add("text-area-big-font");
+        // Create a new BorderPane to hold the VBox and the footer
+        BorderPane borderPane = new BorderPane();
 
-        Scene scene = new Scene(vbox, 800, 600);
+        // Create a Label for the footer
+        Label footerLabel = new Label();
+
+        // Add a listener to the caret position
+        textArea.caretPositionProperty().addListener((obs, oldPosition, newPosition) -> {
+            int line = textArea.getCurrentParagraph();
+            int col = textArea.getCaretColumn();
+            footerLabel.setText("Line: " + (line + 1) + ", Column: " + (col + 1));
+        });
+
+        // Create a HBox for the footer
+        HBox footer = new HBox(footerLabel);
+        footer.setPadding(new Insets(5, 10, 5, 10)); // Optional padding
+
+        // Add the VBox and the footer to the BorderPane
+        borderPane.setCenter(vbox);
+        borderPane.setBottom(footer);
+
+        // Change the scene to use the BorderPane instead of the VBox
+        Scene scene = new Scene(borderPane, 800, 600);
         scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());
 
         primaryStage.setScene(scene);
@@ -102,6 +126,7 @@ public class IdeMZApplication extends Application {
     }
 
     private void configureSaveFileButton(Stage primaryStage) {
+        AtomicBoolean newlyCreated = new AtomicBoolean(false);
         saveFileButton.setPrefSize(20, 20);
         saveFileButton.setOnAction(event -> {
             if (currentFile == null || !currentFile.exists()) {
@@ -111,9 +136,15 @@ public class IdeMZApplication extends Application {
                 if (currentFile == null) {
                     return;
                 }
+                newlyCreated.set(true);
             }
             try {
-                Files.writeString(currentFile.toPath(), textArea.getText(), StandardOpenOption.TRUNCATE_EXISTING);
+                if(newlyCreated.get()) {
+                    Files.writeString(currentFile.toPath(), textArea.getText(), StandardOpenOption.CREATE);
+                    newlyCreated.set(false);
+                }else{
+                    Files.writeString(currentFile.toPath(), textArea.getText(), StandardOpenOption.TRUNCATE_EXISTING);
+                }
                 String command = String.format("java -jar src/main/resources/CompilerMZ-1.0.0-Stable-jar-with-dependencies.jar -i %s --format", currentFile.getAbsolutePath());
                 executeCommand(command);
                 // Reload the text area with the updated file
