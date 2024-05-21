@@ -44,6 +44,7 @@ public class IdeMZApplication extends Application {
     private Button openDirectoryButton;
     private Button saveFileButton;
     private Button runButton;
+    private FileOpener fileOpener;
     private File currentFile;
     private final TreeView<File> directoryTreeView = new TreeView<>();
     private String currentDialect = "default_dialect";
@@ -53,14 +54,17 @@ public class IdeMZApplication extends Application {
     @Override
     public void start(Stage primaryStage) {
 
+        primaryStage.setTitle("IdeMZ");
+
         Image applicationIcon = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/logo.png")));
         primaryStage.getIcons().add(applicationIcon);
+        fileOpener = new FileOpener(primaryStage);
 
         textArea.textProperty().addListener((obs, oldText, newText) -> syntaxHighlighter.highlight(textArea, isDarkMode));
 
         //buttons
         openFileButton = createButton();
-        configureOpenFileButton(primaryStage);
+        configureOpenFileButton();
 
         saveFileButton = new Button();
         configureSaveFileButton(primaryStage);
@@ -120,9 +124,8 @@ public class IdeMZApplication extends Application {
         primaryStage.show();
     }
 
-    private void configureOpenFileButton(Stage primaryStage) {
+    private void configureOpenFileButton() {
         openFileButton.setPrefSize(20, 20);
-        FileOpener fileOpener = new FileOpener(primaryStage);
         openFileButton.setOnAction(event -> {
             File file = fileOpener.openFile();
             if (file != null) {
