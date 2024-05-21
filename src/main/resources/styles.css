@@ -122,16 +122,16 @@
     -fx-fill: lightblue;
 }
 
-.root.dark .non-keyword {
+.dark-mode-non-keyword {
     -fx-fill: white; /* White color for non-keyword text in dark mode */
 }
 
-.root.light .non-keyword {
-    -fx-fill: black; /* Black color for non-keyword text in light mode */
+.light-mode-non-keyword {
+    -fx-fill: black;
 }
 
 .root.dark {
-    -fx-fill: white; /* White color for default text in dark mode */
+    -fx-fill: white;
 }
 
 .text-area-big-font {

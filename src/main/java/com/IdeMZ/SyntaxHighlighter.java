@@ -39,10 +39,14 @@ public class SyntaxHighlighter {
         }
     }
 
-    public void highlight(StyleClassedTextArea textArea) {
+    public void highlight(StyleClassedTextArea textArea, boolean isDarkMode) {
         textArea.clearStyle(0, textArea.getLength());
 
-        textArea.setStyleClass(0, textArea.getLength(), "non-keyword");
+        if (isDarkMode) {
+            textArea.setStyleClass(0, textArea.getLength(), "dark-mode-non-keyword");
+        } else {
+            textArea.setStyleClass(0, textArea.getLength(), "light-mode-non-keyword");
+        }
 
         StringBuilder text = new StringBuilder(textArea.getText());
         boolean inComment = false;
