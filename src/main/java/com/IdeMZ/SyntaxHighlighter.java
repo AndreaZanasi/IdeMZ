@@ -14,8 +14,11 @@ public class SyntaxHighlighter {
     private Map<String, String> dialect;
     private final Map<String, String> syntax;
     private final Pattern integerPattern = Pattern.compile("\\b\\d+\\b");
+    private String dialectName;
+
 
     public SyntaxHighlighter(String dialectName) {
+        this.dialectName = dialectName;
         ObjectMapper mapper = new ObjectMapper();
         try (InputStream is = getClass().getResourceAsStream("/dialects/" + dialectName + ".json")) {
             dialect = mapper.readValue(is, new TypeReference<>() {});
@@ -31,6 +34,7 @@ public class SyntaxHighlighter {
     }
 
     public void updateDialect(String dialectName) {
+        this.dialectName = dialectName;
         ObjectMapper mapper = new ObjectMapper();
         try (InputStream is = getClass().getResourceAsStream("/dialects/" + dialectName + ".json")) {
             dialect = mapper.readValue(is, new TypeReference<>() {});
@@ -52,28 +56,31 @@ public class SyntaxHighlighter {
         boolean inComment = false;
         boolean inMultiLineComment = false;
         boolean inString = false;
-        for (int i = 0; i < text.length(); i++) {
-            char currentChar = text.charAt(i);
-            char nextChar = i < text.length() - 1 ? text.charAt(i + 1) : '\0';
+        String commentToken = dialect.get("comment");
+        String stringToken = dialect.get("quotes");
 
-            if (currentChar == '@' && nextChar == '@') {
-                textArea.setStyleClass(i, i+1, "symbol-comment");
+        for (int i = 0; i < text.length(); i++) {
+            String currentChar = text.substring(i, i + 1);
+            String nextChar = i < text.length() - 1 ? text.substring(i + 1, i + 2) : "";
+
+            if (currentChar.equals(commentToken) && nextChar.equals(commentToken) && !inString) {
+                textArea.setStyleClass(i, i + 2, "symbol-comment");
                 inMultiLineComment = !inMultiLineComment;
                 i++;
-            } else if (currentChar == '@' && !inMultiLineComment) {
+            } else if (currentChar.equals(commentToken) && !inMultiLineComment && !inString) {
                 inComment = true;
-            } else if (currentChar == '\n' && inComment && !inString) {
+            } else if (currentChar.equals("\n") && inComment && !inString) {
                 inComment = false;
-            } else if (currentChar == '\"' && !inString) {
+            } else if (currentChar.equals(stringToken) && !inString) {
                 inString = true;
-            } else if ((currentChar == '\"' || currentChar == '\n') && inString) {
+            } else if ((currentChar.equals(stringToken) || currentChar.equals("\n")) && inString) {
                 inString = false;
             }
 
             if (inComment || inMultiLineComment) {
-                textArea.setStyleClass(i, i+1, "symbol-comment");
+                textArea.setStyleClass(i, i + 1, "symbol-comment");
             } else if (inString) {
-                textArea.setStyleClass(i, i+1, "symbol-quote");
+                textArea.setStyleClass(i, i + 1, "symbol-quote");
             } else {
                 i = applyStyle(textArea, text.toString(), i);
                 Matcher matcher = integerPattern.matcher(text.substring(i));
