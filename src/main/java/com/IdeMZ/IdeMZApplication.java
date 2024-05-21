@@ -44,6 +44,7 @@ public class IdeMZApplication extends Application {
     private Button openDirectoryButton;
     private Button saveFileButton;
     private Button runButton;
+    private Button infoButton;
     private FileOpener fileOpener;
     private File currentFile;
     private final TreeView<File> directoryTreeView = new TreeView<>();
@@ -66,23 +67,26 @@ public class IdeMZApplication extends Application {
         openFileButton = createButton();
         configureOpenFileButton();
 
-        saveFileButton = new Button();
+        saveFileButton = createButton();
         configureSaveFileButton(primaryStage);
 
-        runButton = new Button();
+        runButton = createButton();
         configureRunButton();
 
-        translateButton = new MenuButton();
+        translateButton = createMenuButton();
         configureTranslateButton();
 
         settingsButton = createMenuButton();
         configureSettingsButton();
 
-        openDirectoryButton = new Button();
+        openDirectoryButton = createButton();
         configureOpenDirectoryButton(primaryStage);
 
+        infoButton = createButton();
+        configureInfoButton();
+
         //hbox for buttons
-        hbox = new HBox(openFileButton, openDirectoryButton, saveFileButton, runButton, translateButton, settingsButton);
+        hbox = new HBox(openFileButton, openDirectoryButton, saveFileButton, runButton, translateButton, settingsButton, infoButton);
         hbox.setSpacing(20);
         hbox.setFillHeight(true);
 
@@ -284,6 +288,18 @@ public class IdeMZApplication extends Application {
         });
     }
 
+    private void configureInfoButton() {
+        infoButton.setPrefSize(20, 20);
+        infoButton.setOnAction(event -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Information Dialog");
+            alert.setHeaderText(null);
+            alert.setContentText("IdeMZ is an Integrated Development Environment for the MZ language. It provides syntax highlighting, file management, and the ability to run and translate MZ programs.");
+            alert.setContentText("Current compiler version: 1.0.0-Stable");
+            alert.showAndWait();
+        });
+    }
+
     private TreeItem<File> createNode(final File file) {
         return new TreeItem<>(file) {
             private boolean isFirstTimeChildren = true;
@@ -363,15 +379,9 @@ public class IdeMZApplication extends Application {
 
         dialogVBox.getChildren().add(buttonBox);
 
-        if (isDarkMode) {
-            dialogVBox.setStyle("-fx-background-color: #31363F;");
-        } else {
-            dialogVBox.setStyle("-fx-background-color: #9394A5;");
-        }
-
         styleDialog.getDialogPane().setContent(dialogVBox);
-        styleDialog.getDialogPane().setMinWidth(500);
-        styleDialog.getDialogPane().setMinHeight(300);
+        styleDialog.getDialogPane().setMinWidth(400);
+        styleDialog.getDialogPane().setMinHeight(200);
 
         styleDialog.getDialogPane().getScene().getWindow().setOnCloseRequest(event -> styleDialog.close());
 
@@ -415,6 +425,7 @@ public class IdeMZApplication extends Application {
         setButtonStyleAndGraphic(runButton, darkModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/play_white.png")).toExternalForm()));
         setButtonStyleAndGraphic(translateButton, darkModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/world_white.png")).toExternalForm()));
         setButtonStyleAndGraphic(openDirectoryButton, darkModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/folder_white.png")).toExternalForm()));
+        setButtonStyleAndGraphic(infoButton, darkModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/info_white.png")).toExternalForm()));
 
         textArea.getStyleClass().add("dark");
         isDarkMode = true;
@@ -436,6 +447,7 @@ public class IdeMZApplication extends Application {
         setButtonStyleAndGraphic(runButton, lightModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/play_black.png")).toExternalForm()));
         setButtonStyleAndGraphic(translateButton, lightModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/world_black.png")).toExternalForm()));
         setButtonStyleAndGraphic(openDirectoryButton, lightModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/folder_black.png")).toExternalForm()));
+        setButtonStyleAndGraphic(infoButton, lightModeColor, new Image(Objects.requireNonNull(getClass().getResource("/images/info_black.png")).toExternalForm()));
 
         textArea.getStyleClass().remove("dark");
         textArea.setStyle("-fx-fill: black;");
