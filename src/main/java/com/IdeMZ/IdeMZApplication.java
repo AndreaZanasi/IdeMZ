@@ -18,6 +18,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.fxmisc.richtext.StyleClassedTextArea;
+import javafx.scene.text.Font;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,6 +62,7 @@ public class IdeMZApplication extends Application {
         primaryStage.getIcons().add(applicationIcon);
         fileOpener = new FileOpener(primaryStage);
 
+        textArea.getStyleClass().add("text-area-big-font");
         textArea.textProperty().addListener((obs, oldText, newText) -> syntaxHighlighter.highlight(textArea, isDarkMode));
 
         //buttons

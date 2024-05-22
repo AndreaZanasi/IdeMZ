@@ -53,53 +53,60 @@ public class SyntaxHighlighter {
         }
 
         StringBuilder text = new StringBuilder(textArea.getText());
-        boolean inComment = false;
-        boolean inMultiLineComment = false;
-        boolean inString = false;
-        String commentToken = dialect.get("comment");
-        String stringToken = dialect.get("quotes");
-
         for (int i = 0; i < text.length(); i++) {
-            String currentChar = text.substring(i, i + 1);
-            String nextChar = i < text.length() - 1 ? text.substring(i + 1, i + 2) : "";
-
-            if (currentChar.equals(commentToken) && nextChar.equals(commentToken) && !inString) {
-                textArea.setStyleClass(i, i + 2, "symbol-comment");
-                inMultiLineComment = !inMultiLineComment;
-                i++;
-            } else if (currentChar.equals(commentToken) && !inMultiLineComment && !inString) {
-                inComment = true;
-            } else if (currentChar.equals("\n") && inComment && !inString) {
-                inComment = false;
-            } else if (currentChar.equals(stringToken) && !inString) {
-                inString = true;
-            } else if ((currentChar.equals(stringToken) || currentChar.equals("\n")) && inString) {
-                inString = false;
-            }
-
-            if (inComment || inMultiLineComment) {
-                textArea.setStyleClass(i, i + 1, "symbol-comment");
-            } else if (inString) {
-                textArea.setStyleClass(i, i + 1, "symbol-quote");
-            } else {
-                i = applyStyle(textArea, text.toString(), i);
-                Matcher matcher = integerPattern.matcher(text.substring(i));
-                if (matcher.find() && matcher.start() == 0) {
-                    textArea.setStyleClass(i, i + matcher.end(), "integer");
-                    i += matcher.end() - 1;
-                }
+            System.out.println(text);
+            i = applyStyle(textArea, text.toString(), i);
+            Matcher matcher = integerPattern.matcher(text.substring(i));
+            if (matcher.find() && matcher.start() == 0) {
+                textArea.setStyleClass(i, i + matcher.end(), "integer");
+                i += matcher.end() - 1;
             }
         }
     }
 
     private int applyStyle(StyleClassedTextArea textArea, String text, int i) {
+        String style;
         for (String word : dialect.keySet()) {
             if (text.startsWith(word, i)) {
-                String style = syntax.get(dialect.get(word));
-                if (style != null) {
-                    textArea.setStyleClass(i, i + word.length(), style);
+                if (dialect.get(word).equals("comment")) {
+                    int end = text.indexOf("\n", i);
+                    if (end == -1) {
+                        end = text.length();
+                    }
+                    if (text.startsWith(word + word, i)) {
+                        end = text.indexOf(word + word, i + 2);
+                        if (end == -1) {
+                            end = text.length();
+                        } else {
+                            end += 2;
+                        }
+                    }
+                    style = syntax.get(dialect.get(word));
+                    if (end > text.length()) {
+                        end = text.length();
+                    }
+                    textArea.setStyleClass(i, end, style);
+                    return end - 1;
+                } else if (dialect.get(word).equals("quotes")) {
+                    int end = i + 1;
+                    while (end < text.length() && text.charAt(end) != '\n' && text.charAt(end) != '"') {
+                        end++;
+                    }
+                    if (end < text.length() && text.charAt(end) == '"') {
+                        end++;
+                    }
+                    style = syntax.get(dialect.get(word));
+                    textArea.setStyleClass(i, end, style);
+                    return end - 1;
                 }
-                return i + word.length() - 1;
+                style = syntax.get(dialect.get(word));
+                if (style != null) {
+                    int end = i + word.length();
+                    if (end > text.length()) {
+                        end = text.length();
+                    }
+                    textArea.setStyleClass(i, end, style);
+                }
             }
         }
         return i;
