@@ -18,7 +18,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.fxmisc.richtext.StyleClassedTextArea;
-import javafx.scene.text.Font;
 
 import java.io.File;
 import java.io.IOException;
@@ -168,9 +167,9 @@ public class IdeMZApplication extends Application {
                 }else{
                     Files.writeString(currentFile.toPath(), textArea.getText(), StandardOpenOption.TRUNCATE_EXISTING);
                 }
+
                 String command = String.format("java -jar src/main/resources/CompilerMZ-1.0.0-Stable-jar-with-dependencies.jar -i %s --format", currentFile.getAbsolutePath());
                 executeCommand(command);
-                // Reload the text area with the updated file
                 String content = Files.readString(currentFile.toPath());
                 textArea.replaceText(content);
                 syntaxHighlighter.highlight(textArea, isDarkMode);

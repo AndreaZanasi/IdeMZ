@@ -14,11 +14,9 @@ public class SyntaxHighlighter {
     private Map<String, String> dialect;
     private final Map<String, String> syntax;
     private final Pattern integerPattern = Pattern.compile("\\b\\d+\\b");
-    private String dialectName;
 
 
     public SyntaxHighlighter(String dialectName) {
-        this.dialectName = dialectName;
         ObjectMapper mapper = new ObjectMapper();
         try (InputStream is = getClass().getResourceAsStream("/dialects/" + dialectName + ".json")) {
             dialect = mapper.readValue(is, new TypeReference<>() {});
@@ -34,7 +32,6 @@ public class SyntaxHighlighter {
     }
 
     public void updateDialect(String dialectName) {
-        this.dialectName = dialectName;
         ObjectMapper mapper = new ObjectMapper();
         try (InputStream is = getClass().getResourceAsStream("/dialects/" + dialectName + ".json")) {
             dialect = mapper.readValue(is, new TypeReference<>() {});
@@ -54,7 +51,6 @@ public class SyntaxHighlighter {
 
         StringBuilder text = new StringBuilder(textArea.getText());
         for (int i = 0; i < text.length(); i++) {
-            System.out.println(text);
             i = applyStyle(textArea, text.toString(), i);
             Matcher matcher = integerPattern.matcher(text.substring(i));
             if (matcher.find() && matcher.start() == 0) {
