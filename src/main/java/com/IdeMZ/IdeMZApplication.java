@@ -29,6 +29,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class IdeMZApplication extends Application {
+    public static final String COMPILER_JAR_PATH = "src/main/resources/CompilerMZ-1.0.0-Stable-jar-with-dependencies.jar";
     private static final Logger LOGGER = Logger.getLogger(IdeMZApplication.class.getName());
     private final StyleClassedTextArea textArea = new StyleClassedTextArea();
     private boolean isDarkMode = false;
@@ -169,7 +170,7 @@ public class IdeMZApplication extends Application {
                     Files.writeString(currentFile.toPath(), textArea.getText(), StandardOpenOption.TRUNCATE_EXISTING);
                 }
 
-                String command = String.format("java -jar src/main/resources/CompilerMZ-1.0.0-Stable-jar-with-dependencies.jar -i %s --format", currentFile.getAbsolutePath());
+                String command = String.format("java -jar %s -i %s --format", COMPILER_JAR_PATH, currentFile.getAbsolutePath());
                 executeCommand(command);
                 String content = Files.readString(currentFile.toPath());
                 textArea.replaceText(content);
@@ -206,9 +207,9 @@ public class IdeMZApplication extends Application {
         String filePathWithoutExtension = filePath.substring(0, filePath.lastIndexOf('.'));
         String command;
         if (!currentDialect.equals("default_dialect")) {
-            command = String.format("java -jar src/main/resources/CompilerMZ-1.0.0-Stable-jar-with-dependencies.jar -i %s -d %s && %s; exec bash", filePath, currentDialect, filePathWithoutExtension);
+            command = String.format("java -jar %s -i %s -d %s && %s; exec bash", COMPILER_JAR_PATH, filePath, currentDialect, filePathWithoutExtension);
         } else {
-            command = String.format("java -jar src/main/resources/CompilerMZ-1.0.0-Stable-jar-with-dependencies.jar -i %s && %s; exec bash", filePath, filePathWithoutExtension);
+            command = String.format("java -jar %s -i %s && %s; exec bash", COMPILER_JAR_PATH, filePath, filePathWithoutExtension);
         }
         return command;
     }
@@ -232,7 +233,7 @@ public class IdeMZApplication extends Application {
                             return;
                         }
                         String currentFilePath = currentFile.getAbsolutePath();
-                        String command = String.format("java -jar src/main/resources/CompilerMZ-1.0.0-Stable-jar-with-dependencies.jar -i %s -t %s,%s", currentFilePath, currentDialect, dialectName);
+                        String command = String.format("java -jar %s -i %s -t %s,%s", COMPILER_JAR_PATH, currentFilePath, currentDialect, dialectName);
                         executeCommand(command);
 
                         // Reload the text area with the updated file
@@ -356,10 +357,12 @@ public class IdeMZApplication extends Application {
         infoButton.setPrefSize(20, 20);
         infoButton.setOnAction(event -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Information Dialog");
-            alert.setHeaderText(null);
-            alert.setContentText("IdeMZ is an Integrated Development Environment for the MZ language. It provides syntax highlighting, file management, and the ability to run and translate MZ programs.");
-            alert.setContentText("Current compiler version: 1.0.0-Stable");
+            alert.setTitle("IdeMZ Information");
+            alert.setHeaderText("IdeMZ is an Integrated Development Environment for the MZ language");
+            alert.setContentText("It provides syntax highlighting, file management, and the ability to run and translate MZ programs.\nManaged by Davide Mecugni and Andrea Zanasi.");
+            // Get the version from COMPILER_JAR_PATH string
+            String compilerVersion = COMPILER_JAR_PATH.substring(COMPILER_JAR_PATH.indexOf("CompilerMZ-") + 11, COMPILER_JAR_PATH.indexOf("-jar"));
+            alert.setContentText(alert.getContentText() + "\n\nCompilerMZ version: " + compilerVersion);
             alert.showAndWait();
         });
     }
