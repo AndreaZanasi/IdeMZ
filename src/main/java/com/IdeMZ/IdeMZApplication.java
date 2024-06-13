@@ -29,7 +29,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class IdeMZApplication extends Application {
-    public static final String COMPILER_JAR_PATH = "src/main/resources/CompilerMZ-1.0.0-Stable-jar-with-dependencies.jar";
+    public static final String COMPILER_JAR_PATH = "src/main/resources/CompilerMZ-1.0.1-Fix.jar";
     private static final Logger LOGGER = Logger.getLogger(IdeMZApplication.class.getName());
     private final StyleClassedTextArea textArea = new StyleClassedTextArea();
     private boolean isDarkMode = false;
@@ -361,7 +361,7 @@ public class IdeMZApplication extends Application {
             alert.setHeaderText("IdeMZ is an Integrated Development Environment for the MZ language");
             alert.setContentText("It provides syntax highlighting, file management, and the ability to run and translate MZ programs.\nManaged by Davide Mecugni and Andrea Zanasi.");
             // Get the version from COMPILER_JAR_PATH string
-            String compilerVersion = COMPILER_JAR_PATH.substring(COMPILER_JAR_PATH.indexOf("CompilerMZ-") + 11, COMPILER_JAR_PATH.indexOf("-jar"));
+            String compilerVersion = COMPILER_JAR_PATH.substring(COMPILER_JAR_PATH.lastIndexOf('-') + 1, COMPILER_JAR_PATH.lastIndexOf('.'));
             alert.setContentText(alert.getContentText() + "\n\nCompilerMZ version: " + compilerVersion);
             alert.showAndWait();
         });
