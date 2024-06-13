@@ -21,9 +21,8 @@ import org.fxmisc.richtext.StyleClassedTextArea;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
+import java.nio.charset.MalformedInputException;
+import java.nio.file.*;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
@@ -47,7 +46,9 @@ public class IdeMZApplication extends Application {
     private Button infoButton;
     private FileOpener fileOpener;
     private File currentFile;
+    private File selectedDirectory;
     private final TreeView<File> directoryTreeView = new TreeView<>();
+    private WatchService watchService;
     private String currentDialect = "default_dialect";
     SyntaxHighlighter syntaxHighlighter = new SyntaxHighlighter("default_dialect");
 
@@ -141,7 +142,7 @@ public class IdeMZApplication extends Application {
                     textArea.replaceText(content);
                     syntaxHighlighter.highlight(textArea, isDarkMode);
                 } catch (IOException e) {
-                    LOGGER.log(Level.SEVERE, "An IO exception occurred", e);
+                    LOGGER.log(Level.SEVERE, "An IO exception occurred in configureOpenButton", e);
                 }
             }
         });
@@ -174,7 +175,7 @@ public class IdeMZApplication extends Application {
                 textArea.replaceText(content);
                 syntaxHighlighter.highlight(textArea, isDarkMode);
             } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "An IO exception occurred", e);
+                LOGGER.log(Level.SEVERE, "An IO exception occurred in configureSaveButton", e);
             }
         });
     }
@@ -191,20 +192,25 @@ public class IdeMZApplication extends Application {
                 alert.showAndWait();
             } else {
                 try {
-                    String filePath = currentFile.getAbsolutePath();
-                    String filePathWithoutExtension = filePath.substring(0, filePath.lastIndexOf('.'));
-                    String command;
-                    if (!currentDialect.equals("default_dialect")) {
-                        command = String.format("java -jar src/main/resources/CompilerMZ-1.0.0-Stable-jar-with-dependencies.jar -i %s -d %s && %s; exec bash", filePath, currentDialect, filePathWithoutExtension);
-                    } else {
-                        command = String.format("java -jar src/main/resources/CompilerMZ-1.0.0-Stable-jar-with-dependencies.jar -i %s && %s; exec bash", filePath, filePathWithoutExtension);
-                    }
+                    String command = getString();
                     Runtime.getRuntime().exec(new String[]{"gnome-terminal", "--", "bash", "-c", command});
                 } catch (IOException e) {
-                    LOGGER.log(Level.SEVERE, "An IO exception occurred", e);
+                    LOGGER.log(Level.SEVERE, "An IO exception occurred in configureRunButton", e);
                 }
             }
         });
+    }
+
+    private String getString() {
+        String filePath = currentFile.getAbsolutePath();
+        String filePathWithoutExtension = filePath.substring(0, filePath.lastIndexOf('.'));
+        String command;
+        if (!currentDialect.equals("default_dialect")) {
+            command = String.format("java -jar src/main/resources/CompilerMZ-1.0.0-Stable-jar-with-dependencies.jar -i %s -d %s && %s; exec bash", filePath, currentDialect, filePathWithoutExtension);
+        } else {
+            command = String.format("java -jar src/main/resources/CompilerMZ-1.0.0-Stable-jar-with-dependencies.jar -i %s && %s; exec bash", filePath, filePathWithoutExtension);
+        }
+        return command;
     }
 
     private void configureTranslateButton() {
@@ -272,22 +278,79 @@ public class IdeMZApplication extends Application {
                     String content = Files.readString(currentFile.toPath());
                     textArea.replaceText(content);
                     syntaxHighlighter.highlight(textArea, isDarkMode);
-                } catch (IOException e) {
-                    LOGGER.log(Level.SEVERE, "An IO exception occurred", e);
                 }
+                catch (MalformedInputException e) {
+                    LOGGER.log(Level.WARNING, "Unreadable file", e);
+                }
+                catch (IOException e) {
+                    LOGGER.log(Level.SEVERE, "An IO exception occurred in configureOpenDirectoryButton", e);
+                }
+
             }
         });
 
         openDirectoryButton.setPrefSize(20, 20);
         openDirectoryButton.setOnAction(event -> {
             DirectoryChooser directoryChooser = new DirectoryChooser();
-            File selectedDirectory = directoryChooser.showDialog(primaryStage);
+            selectedDirectory = directoryChooser.showDialog(primaryStage);
             if (selectedDirectory != null) {
-                TreeItem<File> rootItem = createNode(selectedDirectory);
-                directoryTreeView.setRoot(rootItem);
+                updateDirectoryTreeView(selectedDirectory);
+                watchDirectory(selectedDirectory.toPath());
             }
         });
+
+
     }
+
+    private void updateDirectoryTreeView(File file) {
+        TreeItem<File> rootItem = createNode(file);
+        directoryTreeView.setRoot(rootItem);
+        expandTreeView(rootItem);
+
+    }
+
+    private void expandTreeView(TreeItem<File> item) {
+        if (item != null && !item.isLeaf()) {
+            item.setExpanded(true);
+            for (TreeItem<File> child : item.getChildren()) {
+                expandTreeView(child);
+            }
+        }
+    }
+
+    private void watchDirectory(Path path) {
+        try {
+            if (watchService != null) {
+                watchService.close();
+            }
+            watchService = FileSystems.getDefault().newWatchService();
+            path.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
+
+            Thread watchThread = new Thread(() -> {
+                try {
+                    while (true) {
+                        WatchKey key = watchService.take();
+                        for (WatchEvent<?> ignore : key.pollEvents()) {
+                            javafx.application.Platform.runLater(() -> updateDirectoryTreeView(selectedDirectory));
+                        }
+                        boolean valid = key.reset();
+                        if (!valid) {
+                            break;
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } catch (ClosedWatchServiceException e) {
+                    // Watch service closed, do nothing
+                }
+            });
+            watchThread.setDaemon(true);
+            watchThread.start();
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "An IO exception occurred in watchDirectory", e);
+        }
+    }
+
 
     private void configureInfoButton() {
         infoButton.setPrefSize(20, 20);
@@ -347,7 +410,7 @@ public class IdeMZApplication extends Application {
                                         textArea.replaceText(content);
                                         syntaxHighlighter.highlight(textArea, isDarkMode);
                                     } catch (IOException e) {
-                                        LOGGER.log(Level.SEVERE, "An IO exception occurred", e);
+                                        LOGGER.log(Level.SEVERE, "An IO exception occurred in createNode for dir view", e);
                                     }
                                 }
                             });
@@ -376,7 +439,7 @@ public class IdeMZApplication extends Application {
         VBox dialogVBox = new VBox();
         dialogVBox.setAlignment(Pos.CENTER);
 
-        HBox buttonBox = gethBox(dialogVBox);
+        HBox buttonBox = getBox(dialogVBox);
 
         dialogVBox.getChildren().add(buttonBox);
 
@@ -389,7 +452,7 @@ public class IdeMZApplication extends Application {
         return styleDialog;
     }
 
-    private HBox gethBox(VBox dialogVBox) {
+    private HBox getBox(VBox dialogVBox) {
         Button darkModeButton = new Button("Dark Mode");
         darkModeButton.setOnAction(event -> {
             setDarkModeStyle();
@@ -468,10 +531,7 @@ public class IdeMZApplication extends Application {
         try {
             ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", command);
             Process process = processBuilder.start();
-            int exitCode = process.waitFor();
-            if (exitCode != 0) {
-                LOGGER.log(Level.SEVERE, "The process exited with error code: " + exitCode);
-            }
+            process.waitFor();
         } catch (IOException | InterruptedException e) {
             LOGGER.log(Level.SEVERE, "An exception occurred", e);
         }
